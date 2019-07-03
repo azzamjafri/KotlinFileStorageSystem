@@ -7,10 +7,16 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class BucketServiceImpl() : BucketService {
 
@@ -18,7 +24,7 @@ class BucketServiceImpl() : BucketService {
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
     var accessKey = "YOUR ACCESS KEY"
-    var secretKey = "YOUR SCRET KEY"
+    var secretKey = "YOUR SECRET KEY"
 
     init {
         var credentials: AWSCredentials = BasicAWSCredentials(accessKey, secretKey)
@@ -28,18 +34,11 @@ class BucketServiceImpl() : BucketService {
 
     override fun uploadFileTos3bucket(fileName: String, file: File) {
 
-//        println("Flag 2")
-//        GlobalScope.async {
-//            delay(500)
-//            println("Flag 2")
-
 
         s3client?.putObject(PutObjectRequest(bucketName, fileName, file)
                 .withCannedAcl(CannedAccessControlList.PublicRead))
 
 
-//            println("Flag 3")
-//        }
     }
 
 
@@ -53,56 +52,44 @@ class BucketServiceImpl() : BucketService {
 
         var convFile: File = File(file.getOriginalFilename())
 
-//        CoroutineScope(newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors(), "local")).async {
-
-//                    delay(500)
-//                    println("Flag 1")
 
         var fos = FileOutputStream(convFile)
         fos.write(file.getBytes())
         fos.close()
 
-//                }.await()
         return convFile
 
     }
 
 
-    override fun uploadFile(multipartFile: MultipartFile): String {
+    override fun uploadFile(multipartFile: MultipartFile): String = runBlocking {
 
         var fileUrl: String = ""
+        val customDispatcher = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+                .asCoroutineDispatcher()
         try {
-            var file: File
-            var fileName: String
+            var file : File
+            var fileName : String
 
-//            CoroutineScope(newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors(), "local1")).async {
-
-            file = convertMultiPartToFile(multipartFile)
-
-//                    }.join()
-
-
-//            CoroutineScope(newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors(), "local2")).async {
-            fileName = generateFileName(multipartFile)
-
-//                    }.join()
-
-
-//            GlobalScope.async {
+            file = withContext(customDispatcher){ convertMultiPartToFile(multipartFile) }
+            fileName = withContext(customDispatcher) { generateFileName(multipartFile) }
 
             fileUrl = endpointUrl + "/" + bucketName + "/" + fileName
-
-//            println("Flag 1")
-
             println(fileUrl)
-            uploadFileTos3bucket(fileName, file)
+
+
+            val job = async{ uploadFileTos3bucket(fileName, file) }
+            job.join()
+            (customDispatcher.executor as ExecutorService).shutdown()
+
+
+
             file!!.delete()
-//            }.onJoin
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return fileUrl
+        return@runBlocking fileUrl
     }
 
 
