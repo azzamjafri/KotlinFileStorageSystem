@@ -23,7 +23,7 @@ class BucketServiceImpl() : BucketService {
     var bucketName: String = "project-striker-bucket"
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
-    var accessKey = "YOUT ACCESS KEY"
+    var accessKey = "YOUR ACCESS KEY"
     var secretKey = "YOUR SECRET KEY"
 
     init {

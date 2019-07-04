@@ -13,11 +13,11 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class Compressor {
+class Compressor : CompressorService{
 
 
     @Throws(IOException::class)
-    fun imageCompressor(fileTemplate: FileTemplate) : MultipartFile? {
+    override fun imageCompressor(fileTemplate: FileTemplate) : MultipartFile? {
 
         var file = convertMultiPartToFile(fileTemplate.file as MultipartFile)
         val imageName : String = file!!.absolutePath
@@ -55,32 +55,27 @@ class Compressor {
         var fileToBeReturned : MultipartFile = MockMultipartFile(name,
                 originalFileName, contentType, content)
 
-//        println(fileToBeReturned.contentType)
 
         out.close()
         ios.close()
         writer.dispose()
-
-//        println("Compressored size : - " + fileToBeReturned.size)
 
         return fileToBeReturned
 
     }
 
 
-    fun convertMultiPartToFile(file: MultipartFile): File {
+
+    override fun convertMultiPartToFile(file: MultipartFile): File {
 
         var convFile = File(file.getOriginalFilename())
-
-
         var fos = FileOutputStream(convFile)
+
         fos.write(file.getBytes())
         fos.close()
 
         return convFile
-
     }
-
 
 
 }
