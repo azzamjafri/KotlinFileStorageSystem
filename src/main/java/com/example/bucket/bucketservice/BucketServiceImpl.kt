@@ -23,7 +23,7 @@ class BucketServiceImpl() : BucketService {
     var bucketName: String = "project-striker-bucket"
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
-    var accessKey = "YOUR ACCESS KEY"
+    var accessKey = "YOUT ACCESS KEY"
     var secretKey = "YOUR SECRET KEY"
 
     init {
@@ -64,6 +64,7 @@ class BucketServiceImpl() : BucketService {
 
     override fun uploadFile(multipartFile: MultipartFile): String = runBlocking {
 
+//        println("BucketService started ")
         var fileUrl: String = ""
         val customDispatcher = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
                 .asCoroutineDispatcher()
@@ -80,11 +81,9 @@ class BucketServiceImpl() : BucketService {
 
             val job = async{ uploadFileTos3bucket(fileName, file) }
             job.join()
+            file!!.delete()
             (customDispatcher.executor as ExecutorService).shutdown()
 
-
-
-            file!!.delete()
 
         } catch (e: Exception) {
             e.printStackTrace()
