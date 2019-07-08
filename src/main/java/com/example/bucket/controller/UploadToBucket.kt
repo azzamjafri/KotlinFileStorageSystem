@@ -2,6 +2,7 @@ package com.example.bucket.controller
 
 import com.example.bucket.bucketservice.BucketServiceImpl
 import com.example.bucket.bucketservice.Compressor
+import com.example.bucket.bucketservice.VideoCompressor
 import kotlinx.coroutines.*
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -23,11 +24,31 @@ class UploadToBucket {
     fun bucket(@ModelAttribute fileTemplate: FileTemplate, compressor: Compressor) : String = runBlocking {
 
 
+       var fileType = fileTemplate.file?.contentType
+        println(fileType)
 
-       var temp =  GlobalScope.launch {
+        if(fileType.equals("image/jpeg") || fileType.equals("image/jpg")) {
 
-            fileTemplate.file = compressor.imageCompressor(fileTemplate)
-       }.join()
+             GlobalScope.launch {
+
+                fileTemplate.file = compressor.imageCompressor(fileTemplate)
+            }.join()
+        }
+        else if(fileType.equals("application/pdf")) {
+
+            GlobalScope.launch {
+
+//                println("PDF DETECTED ")
+
+                fileTemplate.file = compressor.pdfCompressor(fileTemplate)
+            }.join()
+        }
+        else if(fileType.equals("video/mp4")) {
+            GlobalScope.launch {
+                val viDeoCompressor = VideoCompressor()
+                fileTemplate.file = viDeoCompressor.videoCompressor(fileTemplate as FileTemplate)
+            }
+        }
 
 
         var status : String? = null

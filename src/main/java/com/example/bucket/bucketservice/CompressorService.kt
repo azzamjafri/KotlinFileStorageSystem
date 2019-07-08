@@ -8,5 +8,7 @@ interface CompressorService {
 
     fun imageCompressor(fileTemplate : FileTemplate) : MultipartFile?
 
+    fun pdfCompressor(fileTemplate: FileTemplate) : MultipartFile?
+
     fun convertMultiPartToFile(file : MultipartFile) : File
 }
