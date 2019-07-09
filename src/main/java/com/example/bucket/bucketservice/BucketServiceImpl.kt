@@ -43,7 +43,7 @@ class BucketServiceImpl() : BucketService {
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
     var accessKey = "YOUR KEY HERE"
-    var secretKey = "YOUR SECRET KEY HERE"
+    var secretKey = "YOUR KEY HERE"
 
     init {              //  Constructor setting up client credentials using defined details.
         var credentials: AWSCredentials = BasicAWSCredentials(accessKey, secretKey)
