@@ -5,8 +5,6 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Paths
-
-
 import net.bramp.ffmpeg.FFmpeg
 import net.bramp.ffmpeg.FFmpegExecutor
 import net.bramp.ffmpeg.FFprobe
@@ -14,6 +12,13 @@ import net.bramp.ffmpeg.builder.FFmpegBuilder
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+
+/*
+ * Video Compression is using Library FFmpeg for compressing videos.
+ *
+ *  NOTE : -  FFMPEG currently not working.
+ */
+
 
 
 
@@ -88,77 +93,4 @@ class VideoCompressor() {
 
         return convFile
     }
-
-
-
-
-//class VideoCompressor() {
-//    fun videoCompressor(fileTemplate : FileTemplate) : MultipartFile? {
-//
-////        val factory = XXHashFactory.fastestInstance()
-////
-////        val data = "12345345234572".toByteArray(charset("UTF-8"))
-////        val `in` = ByteArrayInputStream(data)
-////
-////        val seed = -0x68b84d74 // used to initialize the hash value, use whatever
-//         value you want, but always the same
-////        val hash32 = factory.newStreamingHash32(seed)
-////        val buf = ByteArray(8) // for real-world usage, use a larger buffer, like 8192 bytes
-////        while (true) {
-////            val read = `in`.read(buf)
-////            if (read == -1) {
-////                break
-////            }
-////            hash32.update(buf, 0, read)
-////        }
-////        val hash = hash32.getValue()
-//
-//
-////        val factory = LZ4Factory.fastestInstance()
-//
-//
-//// compress data
-//
-//
-//
-//        val data = "12345345234572".toByteArray(charset("UTF-8"))
-//        val decompressedLength = data.size
-//
-//        val compressor = factory.fastCompressor()
-//        val maxCompressedLength = compressor.maxCompressedLength(decompressedLength)
-//        val compressed = ByteArray(maxCompressedLength)
-//        val compressedLength = compressor.compress(data, 0, decompressedLength, compressed, 0, maxCompressedLength)
-//
-//        var file = convertMultiPartToFile(fileTemplate.file)
-//        val outStream = LZ4FrameOutputStream(FileOutputStream(File(fileTemplate.file.toString())))
-//        outStream.write(data)
-//        outStream.close()
-//
-//        val restored = ByteArray(decompressedLength)
-//        val inStream = LZ4FrameInputStream(FileInputStream(File(fileTemplate.file.toString().replace(".mp4", "-test.mp4"))))
-//        inStream.read(restored)
-//        inStream.close()
-//
-////                .replace(".pdf", "-test.lz4")
-//
-//        val path = Paths.get(file.absolutePath.toString().replace(".mp4", "-test.mp4")).toAbsolutePath()
-//        val name = file.absolutePath.toString().replace(".mp4", "-OUTcopressed.mp4")
-//        val originalFileName = file.absolutePath.toString().replace(".mp4", "-test.mp4")
-//        val contentType = "video/mp4"
-//        var content: ByteArray? = null
-//
-//        try {
-//            content = Files.readAllBytes(path)
-//
-//        } catch (e: IOException) {}
-//
-//        var fileToBeReturned : MultipartFile = MockMultipartFile(name,
-//                originalFileName, contentType, content)
-//
-//
-//
-//        return fileToBeReturned
-//
-//
-//    }
 }
