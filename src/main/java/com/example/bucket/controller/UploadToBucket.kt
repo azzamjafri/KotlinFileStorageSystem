@@ -4,15 +4,8 @@ import com.example.bucket.bucketservice.BucketServiceImpl
 import com.example.bucket.bucketservice.Compressor
 import com.example.bucket.bucketservice.VideoCompressor
 import kotlinx.coroutines.*
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
-import java.io.FileOutputStream
-import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.system.measureTimeMillis
 
 
@@ -45,6 +38,8 @@ class UploadToBucket {
                 }.join()                                                                        // .join() will wait for the thread to complete its execution ( Blocking parent(main) thread to go any futher)
             }                                                                                   // Waiting for this:CoroutineScope to return its result
         }
+
+
 
 
 
@@ -88,4 +83,6 @@ class UploadToBucket {
         return@runBlocking status.toString()
 
     }
+
+
 }

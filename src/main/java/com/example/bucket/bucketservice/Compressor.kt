@@ -36,9 +36,9 @@ class Compressor : CompressorService{
     override fun imageCompressor(fileTemplate: FileTemplate) : MultipartFile? = runBlocking {
 
         val customDispatcher = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
-                .asCoroutineDispatcher()                                        // Creating a new Executor Pool
+                .asCoroutineDispatcher()                                                                                // Creating a new Executor Pool
 
-        var file = withContext(customDispatcher) { convertMultiPartToFile(fileTemplate.file as MultipartFile) }         // Converting Multipart file to File type java
+        val file = withContext(customDispatcher) { convertMultiPartToFile(fileTemplate.file as MultipartFile) }    // Converting Multipart file to File type java
         val imageName : String = file!!.absolutePath
 
         val input = File(imageName)

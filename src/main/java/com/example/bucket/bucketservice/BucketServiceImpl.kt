@@ -7,15 +7,18 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
+import com.example.bucket.model.url
 import com.example.bucket.repo.urlRepo
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.jetbrains.kotlin.types.typeUtil.isNullabilityMismatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URL
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -28,16 +31,18 @@ import java.util.concurrent.Executors
  *  File can be deleted from the bucket by passing the generated file URL.
  */
 
-
 class BucketServiceImpl() : BucketService {
 
     @Autowired
-    private var urlRepo: urlRepo? = null
+    private var urlRepo : urlRepo? = null
+
+    @Autowired
+    private var urlObj = url()
 
     var bucketName: String = "project-striker-bucket"
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
-    var accessKey = "YOUR ACCESS KEY HERE"
+    var accessKey = "YOUR KEY HERE"
     var secretKey = "YOUR SECRET KEY HERE"
 
     init {              //  Constructor setting up client credentials using defined details.
@@ -78,7 +83,7 @@ class BucketServiceImpl() : BucketService {
 
     override fun uploadFile(multipartFile: MultipartFile): String = runBlocking {
 
-        var fileUrl: String = ""
+//        var fileUrl: String = ""
         val customDispatcher = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
                 .asCoroutineDispatcher()                //Custom Dispatcher is defined.
         try {
@@ -88,26 +93,29 @@ class BucketServiceImpl() : BucketService {
             file = withContext(customDispatcher){ convertMultiPartToFile(multipartFile) }  // Converting multipart to file
             fileName = withContext(customDispatcher) { generateFileName(multipartFile) }    // Generating file name
 
-            fileUrl = endpointUrl + "/" + bucketName + "/" + fileName
-            println(fileUrl)
+            urlObj.fileUrl = endpointUrl + "/" + bucketName + "/" + fileName
+            println(urlObj.fileUrl)
+            urlRepo?.save(urlObj)
 
 
-            val job = async{ uploadFileTos3bucket(fileName, file) }  // Uplaoding to bucket using putObject
+
+
+            val job = async{ uploadFileTos3bucket(fileName, file) }   // Uplaoding to bucket using putObject
             job.join()
-            file!!.delete()             // Deleting local copy from the system.
-            (customDispatcher.executor as ExecutorService).shutdown()           // Shutting down Executor services.
+            file!!.delete()                                                         // Deleting local copy from the system.
+            (customDispatcher.executor as ExecutorService).shutdown()               // Shutting down Executor services.
 
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return@runBlocking fileUrl          // Returning file URL. Here runBlocking keeps a check whether all the threads completed their jobs or not.
-                                            // if all the jobs are completed their results are combined using .join() and then the fianl result is return when Main thread is not blocked.
+        return@runBlocking urlObj.fileUrl.toString()          // Returning file URL. Here runBlocking keeps a check whether all the threads completed their jobs or not
+                                                              // if all the jobs are completed their results are combined using .join() and then the fianl result is return when Main thread is not blocked.
     }
 
 
-    override fun deleteFileFromS3Bucket(fileUrl: String): String {          // Deleting the file using file Url
-        val fileName: String = fileUrl.substring(fileUrl.lastIndexOf("/") + 1)
+    override fun deleteFileFromS3Bucket(fileName: String): String {          // Deleting the file using file Url
+//        println(fileName)
         s3client?.deleteObject(DeleteObjectRequest(bucketName, fileName))
         return "Successfully deleted"
     }
