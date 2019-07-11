@@ -3,7 +3,10 @@ package com.example.bucket.controller
 import com.example.bucket.bucketservice.BucketServiceImpl
 import com.example.bucket.bucketservice.Compressor
 import com.example.bucket.bucketservice.VideoCompressor
+import com.example.bucket.model.url
+import com.example.bucket.repo.urlRepo
 import kotlinx.coroutines.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import kotlin.system.measureTimeMillis
@@ -21,7 +24,11 @@ import kotlin.system.measureTimeMillis
 
 @CrossOrigin
 @RestController
-class UploadToBucket {
+class UploadToBucket(@Autowired var urlRepo : urlRepo) {
+
+
+
+    var url = url()
 
     @PostMapping(value = ["/post"], consumes = ["multipart/form-data"])
     fun bucket(@ModelAttribute fileTemplate: FileTemplate, compressor: Compressor) : String = runBlocking {
@@ -70,13 +77,15 @@ class UploadToBucket {
                 if (fileTemplate.file == null) {                         // If no file is attached .
                     return@runBlocking "No file Attached !"
                 }
-                async { bucketService.uploadFile(fileTemplate.file as MultipartFile) }                  // Uploading file to AWS Bucket
+                async { url = bucketService.uploadFile(fileTemplate.file as MultipartFile) }.join()                  // Uploading file to AWS Bucket
                 async {
                     filename = bucketService.generateFileName(fileTemplate.file as MultipartFile)       // Generating file name with Time stamp
                     println(filename)
                 }.join()
                 status = "SUCCESS !"
         }
+
+        urlRepo.save(url)
 
         println("Time Taken - " + time)
 

@@ -1,24 +1,28 @@
 package com.example.bucket.model
 
+import com.example.bucket.repo.urlRepo
+import org.hibernate.validator.constraints.NotBlank
 import javax.persistence.*
 
 
-@Entity @Table( name = "UrlTable")
+@Entity
 class url() {
 
-    @Column(name = "URL")
+
+    @Id @GeneratedValue( strategy = GenerationType.AUTO )
+    var id : Long
+
+
+    @get : NotBlank
     var fileUrl : String? = ""
 
-    @GeneratedValue( strategy = GenerationType.AUTO )
-    @Id @Column(name = "ID")
-    var id : Long? = null
-
-    companion object{
-        var incrementer : Long = 0
+    companion object {
+        var temp : Long = 0
     }
 
+
     init {
-        this.id = incrementer++
+        id = temp++
     }
 
 }

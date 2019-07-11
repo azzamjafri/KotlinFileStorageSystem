@@ -13,12 +13,10 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.jetbrains.kotlin.types.typeUtil.isNullabilityMismatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -33,20 +31,17 @@ import java.util.concurrent.Executors
 
 class BucketServiceImpl() : BucketService {
 
-    @Autowired
-    private var urlRepo : urlRepo? = null
 
-    @Autowired
-    private var urlObj = url()
+    var urlObj = url()
 
     var bucketName: String = "project-striker-bucket"
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
-    var accessKey = "YOUR KEY HERE"
-    var secretKey = "YOUR KEY HERE"
+    var accessKey = "AKIA2JIA246E4PQQ4Y2H"
+    var secretKey = "Gm8fjDsE3CEy94eSfyAw5BrDAiWOyd4p68dbcu/I"
 
     init {              //  Constructor setting up client credentials using defined details.
-        var credentials: AWSCredentials = BasicAWSCredentials(accessKey, secretKey)
+        val credentials: AWSCredentials = BasicAWSCredentials(accessKey, secretKey)
         s3client = AmazonS3Client(credentials)
     }
 
@@ -61,7 +56,7 @@ class BucketServiceImpl() : BucketService {
     }
 
 
-    override fun generateFileName(multiPart: MultipartFile): String {       // Adding timestamp to file name
+    override fun generateFileName(multiPart : MultipartFile): String {       // Adding timestamp to file name
 
         return Date().time.toString() + "-" + multiPart.getOriginalFilename().replace(" ", "_")
     }
@@ -69,10 +64,10 @@ class BucketServiceImpl() : BucketService {
 
     override fun convertMultiPartToFile(file: MultipartFile): File {        // Converting multipart file to java file type
 
-        var convFile: File = File(file.getOriginalFilename())
+        val convFile: File = File(file.getOriginalFilename() as String)
 
 
-        var fos = FileOutputStream(convFile)
+        val fos = FileOutputStream(convFile)
         fos.write(file.getBytes())
         fos.close()
 
@@ -81,7 +76,7 @@ class BucketServiceImpl() : BucketService {
     }
 
 
-    override fun uploadFile(multipartFile: MultipartFile): String = runBlocking {
+    override fun uploadFile(multipartFile: MultipartFile): url = runBlocking {
 
 //        var fileUrl: String = ""
         val customDispatcher = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
@@ -95,21 +90,21 @@ class BucketServiceImpl() : BucketService {
 
             urlObj.fileUrl = endpointUrl + "/" + bucketName + "/" + fileName
             println(urlObj.fileUrl)
-            urlRepo?.save(urlObj)
+//            println("Reaching save")
 
-
+            println(urlObj.id)
 
 
             val job = async{ uploadFileTos3bucket(fileName, file) }   // Uplaoding to bucket using putObject
             job.join()
-            file!!.delete()                                                         // Deleting local copy from the system.
+            file.delete()                                                         // Deleting local copy from the system.
             (customDispatcher.executor as ExecutorService).shutdown()               // Shutting down Executor services.
 
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return@runBlocking urlObj.fileUrl.toString()          // Returning file URL. Here runBlocking keeps a check whether all the threads completed their jobs or not
+        return@runBlocking urlObj        // Returning file URL. Here runBlocking keeps a check whether all the threads completed their jobs or not
                                                               // if all the jobs are completed their results are combined using .join() and then the fianl result is return when Main thread is not blocked.
     }
 
