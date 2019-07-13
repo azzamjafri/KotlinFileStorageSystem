@@ -8,7 +8,6 @@ import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.DeleteObjectRequest
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.example.bucket.model.url
-import com.example.bucket.repo.urlRepo
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -37,12 +36,13 @@ class BucketServiceImpl() : BucketService {
     var bucketName: String = "project-striker-bucket"
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
-    var accessKey = ""
-    var secretKey = ""
+    var accessKey = "AKIA2JIA246E4PQQ4Y2H"
+    var secretKey = "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"
 
     init {              //  Constructor setting up client credentials using defined details.
         val credentials: AWSCredentials = BasicAWSCredentials(accessKey, secretKey)
         s3client = AmazonS3Client(credentials)
+
     }
 
 

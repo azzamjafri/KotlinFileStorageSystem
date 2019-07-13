@@ -3,7 +3,9 @@ package com.example.bucket.controller
 import com.example.bucket.bucketservice.BucketServiceImpl
 import com.example.bucket.bucketservice.Compressor
 import com.example.bucket.bucketservice.VideoCompressor
+import com.example.bucket.model.Verification
 import com.example.bucket.model.url
+import com.example.bucket.repo.VerificationRepo
 import com.example.bucket.repo.urlRepo
 import kotlinx.coroutines.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,17 +26,35 @@ import kotlin.system.measureTimeMillis
 
 @CrossOrigin
 @RestController
-class UploadToBucket(@Autowired var urlRepo : urlRepo) {
+class UploadToBucket(@Autowired var urlRepo : urlRepo, @Autowired var verification : VerificationRepo) {
 
 
 
     var url = url()
 
-    @PostMapping(value = ["/post"], consumes = ["multipart/form-data"])
-    fun bucket(@ModelAttribute fileTemplate: FileTemplate, compressor: Compressor) : String = runBlocking {
+    @PostMapping(value = ["/post/{id}"], consumes = ["multipart/form-data"])
+    fun bucket(@ModelAttribute fileTemplate: FileTemplate, compressor: Compressor,
+               @PathVariable id : Long, verificationClass : Verification) : String = runBlocking {
 
 
-       var fileType = fileTemplate.file?.contentType
+
+        if(!(verification.findById(id).isPresent)){
+            println(" NOT A VERIFIED USER !")
+            return@runBlocking "You are not a verified user !"
+        }
+
+//        println("CHECKING PERMISSIONS " + verificationClass.checkWritePermission())
+//        println("Checking actual permissions of file :- " + verification.findPermissionById(id))
+
+        if(!(verification.findWritePermissionById(id))) {
+
+            println(" YOU DON'T HAVE THE PERMISSION TO WRITE FILES !")
+            return@runBlocking "You don't have the write permission!"
+        }
+
+
+
+       val fileType = fileTemplate.file?.contentType
 
 
         if(fileType.equals("image/jpeg") || fileType.equals("image/jpg")) {        // Detecting file type for images
@@ -82,7 +102,7 @@ class UploadToBucket(@Autowired var urlRepo : urlRepo) {
                     filename = bucketService.generateFileName(fileTemplate.file as MultipartFile)       // Generating file name with Time stamp
                     println(filename)
                 }.join()
-                status = "SUCCESS !"
+                status = "Successfully uploaded with id - " + url.id
         }
 
         urlRepo.save(url)

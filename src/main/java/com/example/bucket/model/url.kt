@@ -1,6 +1,5 @@
 package com.example.bucket.model
 
-import com.example.bucket.repo.urlRepo
 import org.hibernate.validator.constraints.NotBlank
 import javax.persistence.*
 
@@ -9,20 +8,25 @@ import javax.persistence.*
 class url() {
 
 
-    @Id @GeneratedValue( strategy = GenerationType.AUTO )
+    @Id @GeneratedValue( strategy = GenerationType.IDENTITY )
     var id : Long
 
 
     @get : NotBlank
     var fileUrl : String? = ""
 
+    @ManyToMany( mappedBy = "urls")
+    var verification : List<Verification> = mutableListOf<Verification>()
+
+
+
     companion object {
         var temp : Long = 0
     }
-
-
     init {
         id = temp++
     }
+
+
 
 }
