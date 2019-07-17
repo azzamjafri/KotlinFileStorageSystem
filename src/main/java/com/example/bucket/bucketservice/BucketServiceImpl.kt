@@ -36,8 +36,8 @@ class BucketServiceImpl() : BucketService {
     var bucketName: String = "project-striker-bucket"
     var endpointUrl: String = "https://s3.ap-south-1.amazonaws.com"
     var s3client: AmazonS3? = null
-    var accessKey = "AKIA2JIA246E4PQQ4Y2H"
-    var secretKey = "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"
+    var accessKey = ""
+    var secretKey = ""
 
     init {              //  Constructor setting up client credentials using defined details.
         val credentials: AWSCredentials = BasicAWSCredentials(accessKey, secretKey)
